@@ -20,20 +20,22 @@ public class UserController {
     UserService userService;
     @RequestMapping("/login")
     @ResponseBody
-    public Map login(@RequestBody String  reqStr){
+    public Map login(@RequestBody String  reqStr,HttpSession session){
         Map user= (Map)JSON.parse(reqStr);
         String username = user.get("username").toString();
         String password = user.get("password").toString();
-        Map loginuser = userService.login(username, password);
+        Map loginuser = userService.login(username, password, session);
+
 //        session.setAttribute("user",loginuser);
         return loginuser;
     }
     @RequestMapping("/register")
-    public void register(@RequestBody String  reqStr){
+    public Map register(@RequestBody String  reqStr){
         Map user= (Map)JSON.parse(reqStr);
         String u = (String) user.get("record");
         JSON j=(JSON) JSON.parse(u);
         User user1 = JSONObject.toJavaObject(j, User.class);
-        userService.register(user1);
+        Map map = userService.register(user1);
+        return map;
     }
 }

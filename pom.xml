@@ -60,6 +60,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- 创建ftp客户端-->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.3</version>
+        </dependency>
     </dependencies>
 
     <build>

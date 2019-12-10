@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: jdbc:mysql://192.168.0.100:3306/legenddisk?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/legenddisk?serverTimezone=UTC
     username: root
-    password: Lyb19961016!
+#    password: Lyb19961016!
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 server:
   port: 9080

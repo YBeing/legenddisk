@@ -14,7 +14,7 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper userMapper;
-    public Map login(String username, String password){
+    public Map login(String username, String password, HttpSession session){
         Map map=new HashMap();
         User user = userMapper.login(username, password);
         if(user==null){
@@ -23,11 +23,21 @@ public class UserServiceImpl implements UserService {
         }else {
             map.put("flag",true);
             map.put("msg","登陆成功！");
+            session.setAttribute("user",user);
         }
         return map;
     }
-    public void register(User user){
-        userMapper.insert(user);
+    public Map register(User user){
+        Map map=new HashMap();
+        int effectRows=userMapper.register(user);
+        if (effectRows==1){
+            map.put("addflag",true);
+        }else{
+            map.put("addflag",false);
+
+        }
+        return map;
+
     }
 
 }
