@@ -12,3 +12,4 @@ server:
 logging:
   level:
     com.service.legenddisk.mapper: debug
+debug: true
