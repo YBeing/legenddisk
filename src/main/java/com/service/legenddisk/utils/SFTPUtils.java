@@ -145,9 +145,8 @@ public class SFTPUtils {
      * @param remoteFilePath
      * @throws Exception
      */
-    public void makeDir(String remoteFilePath, HttpSession session) throws Exception {
+    public void makeDir(String remoteFilePath, String username) throws Exception {
         try {
-            String username=(String)session.getAttribute("username");
             ChannelSftp sftp = connect(sftpConfig);
             setEncodingUTF8(sftp);
             String path2=sftpConfig.getRemoteRootPath()+username+"/"+remoteFilePath;
@@ -181,8 +180,25 @@ public class SFTPUtils {
             throw new RuntimeException("ftp创建文件路径失败  " + e1.getMessage());
         }
 
+    }
+    /**
+     * 重命名文件夹
+     *
+     * @throws Exception
+     */
+    public void renameFileDir(String oldDir, String newDir, HttpSession session) throws Exception {
+        try {
+            String username=(String)session.getAttribute("username");
+            ChannelSftp sftp = connect(sftpConfig);
+            setEncodingUTF8(sftp);
+            String newpath=sftpConfig.getRemoteRootPath()+username+"/"+newDir;
+            String oldpath=sftpConfig.getRemoteRootPath()+username+"/"+oldDir;
+            sftp.rename(oldpath,newpath);
 
 
+        } catch (Exception e1) {
+            throw new RuntimeException("ftp创建文件路径失败  " + e1.getMessage());
+        }
 
     }
     /**
