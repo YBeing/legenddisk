@@ -24,9 +24,9 @@ public class UserController {
         Map user= (Map)JSON.parse(reqStr);
         String username = user.get("username").toString();
         String password = user.get("password").toString();
-        Map loginuser = userService.login(username, password, session);
-
-//        session.setAttribute("user",loginuser);
+        Map loginuser = userService.login(username, password);
+        User user1 = (User)loginuser.get("user");
+        session.setAttribute("username",user1.getUsername());
         return loginuser;
     }
     @RequestMapping("/register")

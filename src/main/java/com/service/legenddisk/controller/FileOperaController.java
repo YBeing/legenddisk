@@ -5,6 +5,8 @@
  */
 package com.service.legenddisk.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.service.legenddisk.utils.SFTPUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -20,9 +23,32 @@ import java.util.Map;
 @Controller
 @RequestMapping("/file")
 public class FileOperaController {
-
+    private static   SFTPUtils sftpUtils=new SFTPUtils();
     @RequestMapping("/makeDir")
-    public void makeDir(){
+    @ResponseBody
+    public void makeDir(@RequestBody String  reqStr, HttpServletRequest request){
+        HttpSession session=request.getSession();
+        Map fileinfo= (Map) JSON.parse(reqStr);
+        String directory = fileinfo.get("directory").toString();
+
+        try {
+            sftpUtils.makeDir(directory,session);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+    @RequestMapping("/test")
+    @ResponseBody
+    public void makeDir(HttpServletRequest request){
+        HttpSession session=request.getSession();
+
+
+        String username=(String)session.getAttribute("username");
+        System.out.println(username);
+
+
 
     }
     @RequestMapping("/upload")

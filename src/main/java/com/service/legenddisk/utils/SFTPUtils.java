@@ -10,7 +10,9 @@ import com.service.legenddisk.config.SftpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -26,6 +28,7 @@ public class SFTPUtils {
     private long sleepTime;
 
     private static final Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
+    private  static  final SftpConfig sftpConfig=new SftpConfig("192.168.198.128", 22, "root", "root", 1000, "/usr/sftp/");
 
     /**
      * 连接sftp服务器
@@ -71,9 +74,9 @@ public class SFTPUtils {
      *
      * @param directory  上传的目录
      * @param uploadFile 要上传的文件
-     * @param sftpConfig
+     * @param
      */
-    public void upload(String directory, String uploadFile, SftpConfig sftpConfig) {
+    public void upload(String directory, String uploadFile) {
         ChannelSftp sftp = connect(sftpConfig);
         try {
             sftp.cd(directory);
@@ -104,9 +107,8 @@ public class SFTPUtils {
      * @param directory    下载目录
      * @param downloadFile 下载的文件
      * @param saveFile     存在本地的路径
-     * @param sftpConfig
      */
-    public void download(String directory, String downloadFile, String saveFile, SftpConfig sftpConfig) {
+    public void download(String directory, String downloadFile, String saveFile ) {
         OutputStream output = null;
         try {
             File localDirFile = new File(saveFile);
@@ -137,7 +139,52 @@ public class SFTPUtils {
             closeStream(null,output);
         }
     }
+    /**
+     * 新建文件夹
+     *
+     * @param remoteFilePath
+     * @throws Exception
+     */
+    public void makeDir(String remoteFilePath, HttpSession session) throws Exception {
+        try {
+            String username=(String)session.getAttribute("username");
+            ChannelSftp sftp = connect(sftpConfig);
+            setEncodingUTF8(sftp);
+            String path2=sftpConfig.getRemoteRootPath()+username+"/"+remoteFilePath;
+            if (isDirExist(path2,sftp)) {
+                logger.info("该路径已经存在！");
+            }else{
+                String pathArry[] = path2.split("/");
+                String checkpath="";
 
+                for (String path : pathArry) {
+                    if (path.equals("")) {
+                        continue;
+                    }
+                    checkpath=checkpath+"/"+path;
+
+                    if (isDirExist(checkpath,sftp)) {
+                        sftp.cd(path);
+
+                    }else {
+                        String currentpath=checkpath.substring(0,checkpath.lastIndexOf("/"));
+                        sftp.cd(currentpath);
+                        // 建立目录
+                        sftp.mkdir(path);
+                        // 进入并设置为当前目录
+                        sftp.cd(path);
+                    }
+                }
+            }
+
+        } catch (Exception e1) {
+            throw new RuntimeException("ftp创建文件路径失败  " + e1.getMessage());
+        }
+
+
+
+
+    }
     /**
      * 下载远程文件夹下的所有文件
      *
@@ -145,7 +192,7 @@ public class SFTPUtils {
      * @param localDirPath
      * @throws Exception
      */
-    public void getFileDir(String remoteFilePath, String localDirPath, SftpConfig sftpConfig) throws Exception {
+    public void getFileDir(String remoteFilePath, String localDirPath ) throws Exception {
         File localDirFile = new File(localDirPath);
         // 判断本地目录是否存在，不存在需要新建各级目录
         if (!localDirFile.exists()) {
@@ -226,11 +273,10 @@ public class SFTPUtils {
      * 列出目录下的文件
      *
      * @param directory  要列出的目录
-     * @param sftpConfig
      * @return
      * @throws SftpException
      */
-    public List<String> listFiles(String directory, SftpConfig sftpConfig) throws SftpException {
+    public List<String> listFiles(String directory ) throws SftpException {
         ChannelSftp sftp = connect(sftpConfig);
         List fileNameList = new ArrayList();
         try {
@@ -264,6 +310,43 @@ public class SFTPUtils {
             e.printStackTrace();
         }
     }
+    /**
+     * 判断目录是否存在
+     */
+    public static boolean isDirExist(String directory,ChannelSftp sftp) {
+        boolean isDirExistFlag = false;
+        try {
+            SftpATTRS sftpATTRS = sftp.lstat(directory);
+            isDirExistFlag = true;
+            return sftpATTRS.isDir();
+        } catch (Exception e) {
+            if (e.getMessage().toLowerCase().equals("no such file")) {
+                isDirExistFlag = false;
+            }
+        }
+        return isDirExistFlag;
+    }
+    /**
+     *  处理上传文件夹的中文乱码问题
+     * @param sftp
+     * @return void
+     */
+    public static void setEncodingUTF8(ChannelSftp sftp) {
+
+        /*通过反射处理上传文件夹的中文乱码问题*/
+        try {
+            Class<ChannelSftp> c = ChannelSftp.class;
+            Field f = null;
+            f = c.getDeclaredField("server_version");
+            f.setAccessible(true);
+            f.set(sftp, 2);
+            sftp.setFilenameEncoding("gbk");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     public SFTPUtils(long count, long sleepTime) {
         this.count = count;
@@ -276,9 +359,8 @@ public class SFTPUtils {
 
     public static void main(String[] args) {
         SFTPUtils ftp = new SFTPUtils(3, 6000);
-        SftpConfig sftpConfig = new SftpConfig("192.168.198.128", 22, "root", "root", 1000, "/usr/src");
         try {
-            List<String> list = ftp.listFiles("/usr/src", sftpConfig);
+            List<String> list = ftp.listFiles("/usr/src");
             logger.info("文件上传下载详情"  ,new Object[]{list});
         } catch (SftpException e) {
             logger.error("文件上传下载异常:[{}]" ,new Object[]{e});

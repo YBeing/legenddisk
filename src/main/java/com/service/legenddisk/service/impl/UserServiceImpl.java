@@ -6,7 +6,6 @@ import com.service.legenddisk.service.UserService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
     @Resource
     private UserMapper userMapper;
-    public Map login(String username, String password, HttpSession session){
+    public Map login(String username, String password){
         Map map=new HashMap();
         User user = userMapper.login(username, password);
         if(user==null){
@@ -23,7 +22,7 @@ public class UserServiceImpl implements UserService {
         }else {
             map.put("flag",true);
             map.put("msg","登陆成功！");
-            session.setAttribute("user",user);
+            map.put("user",user);
         }
         return map;
     }
