@@ -10,6 +10,6 @@ import com.service.legenddisk.pojo.DirInfo;
 import java.util.List;
 
 public interface DirInfoService {
-    public void addDir(String dirname,String username,String currentlevelindex);
+    public void addDir(String dirname,String username,String currentlevelindex,String dirPath);
     public List<DirInfo> getLevelOneDirList(String username);
 }

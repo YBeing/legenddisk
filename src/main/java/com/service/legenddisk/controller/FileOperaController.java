@@ -40,14 +40,10 @@ public class FileOperaController {
         HttpSession session=request.getSession();
         String username =(String) session.getAttribute("username");
         Map fileinfo= (Map) JSON.parse(reqStr);
-        String directory = fileinfo.get("directory").toString();
+        String directoryname = fileinfo.get("directory").toString();
         String currentLevelIndex = fileinfo.get("index").toString();
-        dirInfoService.addDir(directory,username,currentLevelIndex);
-        /*try {
-            sftpUtils.makeDir(directory,username);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
+        String dirPath = fileinfo.get("index").toString();
+        dirInfoService.addDir(directoryname,username,currentLevelIndex,dirPath);
 
 
     }

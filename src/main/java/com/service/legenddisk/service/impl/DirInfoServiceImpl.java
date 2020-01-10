@@ -18,7 +18,7 @@ public class DirInfoServiceImpl implements DirInfoService {
     @Autowired
     private DirInfoMapper dirInfoMapper;
     @Override
-    public void addDir(String dirname, String username,String currentlevelindex) {
+    public void addDir(String dirname, String username,String currentlevelindex,String dirPath) {
         try {
             sftpUtils.makeDir(dirname,username);
             DirInfo dirInfo=new DirInfo();
@@ -26,7 +26,7 @@ public class DirInfoServiceImpl implements DirInfoService {
             dirInfo.setDirname(dirname);
             dirInfo.setUsername(username);
             dirInfo.setType("1");
-            dirInfo.setDirpath("1");
+            dirInfo.setDirpath(dirPath);
             dirInfoMapper.insert(dirInfo);
         } catch (Exception e) {
             e.printStackTrace();
