@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.service.legenddisk.pojo.User;
 import com.service.legenddisk.service.UserService;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class UserController {
     @Autowired
     UserService userService;
+    private  static Logger loginlogger=Logger.getLogger("loginLog");
     @RequestMapping("/login")
     @ResponseBody
     public Map login(@RequestBody String  reqStr,HttpSession session){
@@ -27,6 +29,7 @@ public class UserController {
         Map loginuser = userService.login(username, password);
         User user1 = (User)loginuser.get("user");
         session.setAttribute("username",user1.getUsername());
+        loginlogger.info("登录成功！");
         return loginuser;
     }
     @RequestMapping("/register")

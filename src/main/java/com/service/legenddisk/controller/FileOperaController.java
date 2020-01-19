@@ -24,7 +24,6 @@ import java.util.Map;
 @Controller
 @RequestMapping("/file")
 public class FileOperaController {
-//    private static   SFTPUtils sftpUtils=new SFTPUtils();
     @Resource
     private DirInfoService dirInfoService;
     /**

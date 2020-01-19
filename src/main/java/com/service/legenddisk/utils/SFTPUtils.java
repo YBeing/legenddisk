@@ -7,8 +7,7 @@ package com.service.legenddisk.utils;
 
 import com.jcraft.jsch.*;
 import com.service.legenddisk.config.SftpConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpSession;
 import java.io.*;
@@ -26,8 +25,7 @@ public class SFTPUtils {
     private long count1 = 0;
 
     private long sleepTime;
-
-    private static final Logger logger = LoggerFactory.getLogger(SFTPUtils.class);
+    private  static Logger ftplogger=Logger.getLogger("ftpLog");
     private  static  final SftpConfig sftpConfig=new SftpConfig("192.168.198.128", 22, "root", "root", 1000, "/usr/sftp/");
 
     /**
@@ -41,18 +39,18 @@ public class SFTPUtils {
             JSch jsch = new JSch();
             jsch.getSession(sftpConfig.getUsername(), sftpConfig.getHostname(), sftpConfig.getPort());
             Session sshSession = jsch.getSession(sftpConfig.getUsername(), sftpConfig.getHostname(), sftpConfig.getPort());
-            logger.info("Session created ... UserName=" + sftpConfig.getUsername() + ";host=" + sftpConfig.getHostname() + ";port=" + sftpConfig.getPort());
+            ftplogger.info("Session created ... UserName=" + sftpConfig.getUsername() + ";host=" + sftpConfig.getHostname() + ";port=" + sftpConfig.getPort());
             sshSession.setPassword(sftpConfig.getPassword());
             Properties sshConfig = new Properties();
             sshConfig.put("StrictHostKeyChecking", "no");
             sshSession.setConfig(sshConfig);
             sshSession.connect();
-            logger.info("Session connected ...");
-            logger.info("Opening Channel ...");
+            ftplogger.info("Session connected ...");
+            ftplogger.info("Opening Channel ...");
             Channel channel = sshSession.openChannel("sftp");
             channel.connect();
             sftp = (ChannelSftp) channel;
-            logger.info("登录成功");
+            ftplogger.info("登录成功");
         } catch (Exception e) {
             try {
                 count1 += 1;
@@ -60,7 +58,7 @@ public class SFTPUtils {
                     throw new RuntimeException(e);
                 }
                 Thread.sleep(sleepTime);
-                logger.info("重新连接....");
+                ftplogger.info("重新连接....");
                 connect(sftpConfig);
             } catch (InterruptedException e1) {
                 throw new RuntimeException(e1);
@@ -116,23 +114,17 @@ public class SFTPUtils {
             if (!localDirFile.exists()) {
                 localDirFile.mkdirs();
             }
-            if (logger.isInfoEnabled()) {
-                logger.info("开始获取远程文件:[{}]---->[{}]", new Object[]{directory, saveFile});
-            }
+                ftplogger.info("开始获取远程文件:[{}]---->[{}]");
             ChannelSftp sftp = connect(sftpConfig);
             sftp.cd(directory);
-            if (logger.isInfoEnabled()) {
-                logger.info("打开远程文件:[{}]", new Object[]{directory});
-            }
+                ftplogger.info("打开远程文件:[{}]");
             output = new FileOutputStream(new File(saveFile.concat(File.separator).concat(downloadFile)));
             sftp.get(downloadFile, output);
-            if (logger.isInfoEnabled()) {
-                logger.info("文件下载成功");
-            }
+                ftplogger.info("文件下载成功");
             disConnect(sftp);
         } catch (Exception e) {
-            if (logger.isInfoEnabled()) {
-                logger.info("文件下载出现异常，[{}]", e);
+            if (ftplogger.isInfoEnabled()) {
+                ftplogger.info("文件下载出现异常，[{}]", e);
             }
             throw new RuntimeException("文件下载出现异常，[{}]", e);
         } finally {
@@ -151,7 +143,7 @@ public class SFTPUtils {
             setEncodingUTF8(sftp);
             String path2=sftpConfig.getRemoteRootPath()+username+"/"+remoteFilePath;
             if (isDirExist(path2,sftp)) {
-                logger.info("该路径已经存在！");
+                ftplogger.info("该路径已经存在！");
             }else{
                 String pathArry[] = path2.split("/");
                 String checkpath="";
@@ -214,14 +206,10 @@ public class SFTPUtils {
         if (!localDirFile.exists()) {
             localDirFile.mkdirs();
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("sftp文件服务器文件夹[{}],下载到本地目录[{}]", new Object[]{remoteFilePath, localDirFile});
-        }
+            ftplogger.info("sftp文件服务器文件夹[{}],下载到本地目录[{}]");
         ChannelSftp channelSftp = connect(sftpConfig);
         Vector<ChannelSftp.LsEntry> lsEntries = channelSftp.ls(remoteFilePath);
-        if (logger.isInfoEnabled()) {
-            logger.info("远程目录下的文件为[{}]", lsEntries);
-        }
+            ftplogger.info("远程目录下的文件为[{}]");
         for (ChannelSftp.LsEntry entry : lsEntries) {
             String fileName = entry.getFilename();
             if (checkFileName(fileName)) {
@@ -377,9 +365,9 @@ public class SFTPUtils {
         SFTPUtils ftp = new SFTPUtils(3, 6000);
         try {
             List<String> list = ftp.listFiles("/usr/src");
-            logger.info("文件上传下载详情"  ,new Object[]{list});
+            ftplogger.info("文件上传下载详情" );
         } catch (SftpException e) {
-            logger.error("文件上传下载异常:[{}]" ,new Object[]{e});
+            ftplogger.error("文件上传下载异常:[{}]" );
         }
     }
 }

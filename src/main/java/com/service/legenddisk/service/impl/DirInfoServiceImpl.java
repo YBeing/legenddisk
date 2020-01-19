@@ -9,13 +9,14 @@ import com.service.legenddisk.mapper.DirInfoMapper;
 import com.service.legenddisk.pojo.DirInfo;
 import com.service.legenddisk.service.DirInfoService;
 import com.service.legenddisk.utils.SFTPUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
-
+@Service
 public class DirInfoServiceImpl implements DirInfoService {
     private static   SFTPUtils sftpUtils=new SFTPUtils();
-    @Autowired
+    @Resource
     private DirInfoMapper dirInfoMapper;
     @Override
     public void addDir(String dirname, String username,String currentlevelindex,String dirPath) {
