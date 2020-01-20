@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -34,7 +35,7 @@ public class FileOperaController {
      */
     @RequestMapping("/makeDir")
     @ResponseBody
-    public void makeDir(@RequestBody String  reqStr, HttpServletRequest request){
+    public Map makeDir(@RequestBody String  reqStr, HttpServletRequest request){
 
         HttpSession session=request.getSession();
         String username =(String) session.getAttribute("username");
@@ -42,7 +43,7 @@ public class FileOperaController {
         String directoryname = fileinfo.get("directory").toString();
         String currentLevelIndex = fileinfo.get("index").toString();
         String dirPath = fileinfo.get("index").toString();
-        dirInfoService.addDir(directoryname,username,currentLevelIndex,dirPath);
+        return dirInfoService.addDir(directoryname,username,currentLevelIndex,dirPath);
 
 
     }
@@ -60,13 +61,8 @@ public class FileOperaController {
         Map fileinfo= (Map) JSON.parse(reqStr);
         String oldDirectory = fileinfo.get("oldDirectory").toString();
         String newDirectory = fileinfo.get("newDirectory").toString();
-
-//        try {
-//            sftpUtils.renameFileDir(oldDirectory,newDirectory,session);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
+        Integer did = Integer.parseInt(fileinfo.get("did").toString());
+        dirInfoService.renameFileDir(oldDirectory,newDirectory,did,session);
 
     }
     /**
@@ -77,8 +73,10 @@ public class FileOperaController {
      */
     @RequestMapping("/getLevelOneDirList")
     @ResponseBody
-    public void getLevelOneDirList(@RequestBody String  reqStr, HttpServletRequest request){
-
+    public List getLevelOneDirList(@RequestBody String  reqStr, HttpServletRequest request){
+        HttpSession session=request.getSession();
+        String username =(String) session.getAttribute("username");
+        return dirInfoService.getLevelOneDirList(username);
 
 
 

@@ -12,10 +12,8 @@ import org.apache.log4j.Logger;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
+
 /*sftp操作工具类*/
 public class SFTPUtils {
     private long count;
@@ -26,7 +24,13 @@ public class SFTPUtils {
 
     private long sleepTime;
     private  static Logger ftplogger=Logger.getLogger("ftpLog");
-    private  static  final SftpConfig sftpConfig=new SftpConfig("192.168.198.128", 22, "root", "root", 1000, "/usr/sftp/");
+    private static String ftp_host =ConfigureParser.getPropert("ftp_host");
+    private static Integer ftp_port =Integer.parseInt(ConfigureParser.getPropert("ftp_port"));
+    private static String username =ConfigureParser.getPropert("username");
+    private static String password =ConfigureParser.getPropert("password");
+    private static Integer timeout =Integer.parseInt(ConfigureParser.getPropert("timeout"));
+    private static String remoteRootPath =ConfigureParser.getPropert("remoteRootPath");
+    private  static  final SftpConfig sftpConfig=new SftpConfig(ftp_host, ftp_port, username, password, timeout, remoteRootPath);
 
     /**
      * 连接sftp服务器
@@ -137,12 +141,14 @@ public class SFTPUtils {
      * @param remoteFilePath
      * @throws Exception
      */
-    public void makeDir(String remoteFilePath, String username) throws Exception {
+    public Map makeDir(String remoteFilePath, String username) throws Exception {
+        Map map=new HashMap();
         try {
             ChannelSftp sftp = connect(sftpConfig);
             setEncodingUTF8(sftp);
             String path2=sftpConfig.getRemoteRootPath()+username+"/"+remoteFilePath;
             if (isDirExist(path2,sftp)) {
+                map.put("msg","该路径已经存在!");
                 ftplogger.info("该路径已经存在！");
             }else{
                 String pathArry[] = path2.split("/");
@@ -166,11 +172,13 @@ public class SFTPUtils {
                         sftp.cd(path);
                     }
                 }
+                map.put("msg","创建成功");
             }
 
         } catch (Exception e1) {
             throw new RuntimeException("ftp创建文件路径失败  " + e1.getMessage());
         }
+        return map;
 
     }
     /**

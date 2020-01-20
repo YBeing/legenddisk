@@ -12,16 +12,21 @@ import com.service.legenddisk.utils.SFTPUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 @Service
 public class DirInfoServiceImpl implements DirInfoService {
     private static   SFTPUtils sftpUtils=new SFTPUtils();
     @Resource
     private DirInfoMapper dirInfoMapper;
     @Override
-    public void addDir(String dirname, String username,String currentlevelindex,String dirPath) {
+    public Map addDir(String dirname, String username, String currentlevelindex, String dirPath) {
+        Map map=new HashMap();
         try {
-            sftpUtils.makeDir(dirname,username);
+            map= sftpUtils.makeDir(dirname,username);
             DirInfo dirInfo=new DirInfo();
             dirInfo.setDirlevel(Integer.parseInt(currentlevelindex));
             dirInfo.setDirname(dirname);
@@ -32,10 +37,22 @@ public class DirInfoServiceImpl implements DirInfoService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return map;
     }
 
     @Override
     public List<DirInfo> getLevelOneDirList(String username) {
         return dirInfoMapper.getLevelOneDirList(username);
+    }
+
+    @Override
+    public List<DirInfo> renameFileDir(String oldDir, String newDir,Integer did, HttpSession session)   {
+        try {
+            sftpUtils.renameFileDir(oldDir,newDir,session);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        dirInfoMapper.updateFilename(newDir,did);
+        return null;
     }
 }

@@ -59,4 +59,6 @@ public interface DirInfoMapper {
     int updateByPrimaryKey(DirInfo record);
     @Select({"select * from dir_info where dirlevel=1 and username = #{username}"})
     List<DirInfo> getLevelOneDirList(String username);
+    @Update("update dir_info set dirpath = #{dirpath,jdbcType=VARCHAR} where did = #{did,jdbcType=INTEGER}")
+    int updateFilename(@Param("dirpath") String dirpath,@Param("did") Integer did);
 }
